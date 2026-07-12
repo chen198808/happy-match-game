@@ -10,46 +10,28 @@
       overflow: hidden;
       background: transparent;
     }
-    #ad-container {
+    #ad-frame {
       width: 100%;
       height: 90px;
+      border: none;
+      display: block;
     }
   </style>
 </head>
 <body>
-  <div id="ad-container"></div>
+  <iframe id="ad-frame" src="about:blank"></iframe>
   <script>
     (function() {
-      var adScriptUrl = 'http://wm.lrswl.com/page/s.php?s=295046&w=950&h=90';
-      var proxyApi = 'https://api.allorigins.win/raw?url=';
+      var adUrl = 'http://wm.lrswl.com/page/?s=295046';
+      var proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(adUrl);
       
-      fetch(proxyApi + encodeURIComponent(adScriptUrl))
-        .then(function(response) { return response.text(); })
-        .then(function(scriptContent) {
-          var iframeMatch = scriptContent.match(/src="([^"]+)"/);
-          if (iframeMatch && iframeMatch[1]) {
-            var iframeSrc = iframeMatch[1];
-            var proxyIframeSrc = proxyApi + encodeURIComponent(iframeSrc);
-            
-            var iframe = document.createElement('iframe');
-            iframe.src = proxyIframeSrc;
-            iframe.width = '100%';
-            iframe.height = '90';
-            iframe.frameBorder = '0';
-            iframe.marginWidth = '0';
-            iframe.marginHeight = '0';
-            iframe.vspace = '0';
-            iframe.hspace = '0';
-            iframe.allowTransparency = 'true';
-            iframe.scrolling = 'no';
-            iframe.style.width = '100%';
-            iframe.style.border = 'none';
-            document.getElementById('ad-container').appendChild(iframe);
-          }
-        })
-        .catch(function(err) {
-          console.error('广告加载失败:', err);
-        });
+      var iframe = document.getElementById('ad-frame');
+      iframe.src = proxyUrl;
+      
+      iframe.onerror = function() {
+        var backupProxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(adUrl);
+        iframe.src = backupProxy;
+      };
     })();
   </script>
 </body>

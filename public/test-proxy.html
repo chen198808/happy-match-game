@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>广告代理测试</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f0f0f0; }
+    .test-box { margin: 10px 0; padding: 10px; border: 1px solid #ccc; background: white; border-radius: 5px; }
+    .test-box h3 { margin: 0 0 10px 0; font-size: 14px; }
+    .ad-container { width: 100%; height: 90px; background: #eee; border: 1px dashed #999; }
+    .status { font-size: 12px; color: #666; margin-top: 5px; }
+    .success { color: green; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+  <h2>广告代理服务测试</h2>
+
+  <div class="test-box">
+    <h3>1. 直接加载 (HTTP) - 对照组</h3>
+    <div id="test1" class="ad-container"></div>
+    <div id="status1" class="status">等待加载...</div>
+  </div>
+
+  <div class="test-box">
+    <h3>2. allorigins.win 代理</h3>
+    <div id="test2" class="ad-container"></div>
+    <div id="status2" class="status">等待加载...</div>
+  </div>
+
+  <div class="test-box">
+    <h3>3. corsproxy.io 代理</h3>
+    <div id="test3" class="ad-container"></div>
+    <div id="status3" class="status">等待加载...</div>
+  </div>
+
+  <div class="test-box">
+    <h3>4. codetabs.com 代理</h3>
+    <div id="test4" class="ad-container"></div>
+    <div id="status4" class="status">等待加载...</div>
+  </div>
+
+  <div class="test-box">
+    <h3>5. whateverorigin.org 代理</h3>
+    <div id="test5" class="ad-container"></div>
+    <div id="status5" class="status">等待加载...</div>
+  </div>
+
+  <script>
+    var adUrl = 'http://wm.lrswl.com/page/s.php?s=295046&w=950&h=90';
+    var adPageUrl = 'http://wm.lrswl.com/page/?s=295046';
+
+    function setStatus(id, text, isError) {
+      var el = document.getElementById('status' + id);
+      el.textContent = text;
+      el.className = 'status ' + (isError ? 'error' : 'success');
+    }
+
+    function testScript(id, proxyUrl) {
+      var container = document.getElementById('test' + id);
+      try {
+        var script = document.createElement('script');
+        if (proxyUrl) {
+          script.src = proxyUrl + encodeURIComponent(adUrl);
+        } else {
+          script.src = adUrl;
+        }
+        script.onload = function() {
+          setStatus(id, '脚本加载成功', false);
+        };
+        script.onerror = function() {
+          setStatus(id, '脚本加载失败', true);
+        };
+        container.appendChild(script);
+      } catch(e) {
+        setStatus(id, '错误: ' + e.message, true);
+      }
+    }
+
+    function testIframe(id, proxyUrl) {
+      var container = document.getElementById('test' + id);
+      try {
+        var iframe = document.createElement('iframe');
+        if (proxyUrl) {
+          iframe.src = proxyUrl + encodeURIComponent(adPageUrl);
+        } else {
+          iframe.src = adPageUrl;
+        }
+        iframe.width = '100%';
+        iframe.height = '90';
+        iframe.frameBorder = '0';
+        iframe.onload = function() {
+          setStatus(id, 'iframe加载成功', false);
+        };
+        iframe.onerror = function() {
+          setStatus(id, 'iframe加载失败', true);
+        };
+        container.appendChild(iframe);
+      } catch(e) {
+        setStatus(id, '错误: ' + e.message, true);
+      }
+    }
+
+    testScript(1, null);
+    testScript(2, 'https://api.allorigins.win/raw?url=');
+    testScript(3, 'https://corsproxy.io/?');
+    testScript(4, 'https://api.codetabs.com/v1/proxy?quest=');
+    testIframe(5, 'https://whateverorigin.org/get?url=');
+  </script>
+</body>
+</html>
