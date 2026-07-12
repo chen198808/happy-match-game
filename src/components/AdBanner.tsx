@@ -1,35 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 
 export const AdBanner: React.FC = () => {
-  const adRef = useRef<HTMLDivElement>(null);
   const [adLoaded, setAdLoaded] = useState(false);
-
-  useEffect(() => {
-    if (adRef.current) {
-      adRef.current.innerHTML = '';
-      
-      const frame = document.createElement('iframe');
-      frame.src = '/ad-banner.html';
-      frame.width = '100%';
-      frame.height = '90';
-      frame.style.border = 'none';
-      frame.style.borderRadius = '0.75rem';
-      frame.style.overflow = 'hidden';
-      frame.scrolling = 'no';
-      frame.setAttribute('allowtransparency', 'true');
-      
-      frame.onload = () => {
-        setAdLoaded(true);
-      };
-      
-      adRef.current.appendChild(frame);
-    }
-  }, []);
 
   return (
     <div className="w-full max-w-4xl mx-auto">
       <div 
-        ref={adRef}
         className="w-full bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl overflow-hidden shadow-lg border-2 border-white/30"
         style={{ minHeight: '90px' }}
       >
@@ -38,6 +14,15 @@ export const AdBanner: React.FC = () => {
             广告加载中...
           </div>
         )}
+        <iframe
+          src="ad-banner.html"
+          width="100%"
+          height="90"
+          style={{ border: 'none', display: adLoaded ? 'block' : 'none', borderRadius: '0.75rem' }}
+          scrolling="no"
+          allowTransparency={true}
+          onLoad={() => setAdLoaded(true)}
+        />
       </div>
     </div>
   );
