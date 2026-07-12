@@ -10,28 +10,104 @@
       overflow: hidden;
       background: transparent;
     }
-    #ad-frame {
+    #ad-container {
       width: 100%;
       height: 90px;
-      border: none;
-      display: block;
     }
   </style>
 </head>
 <body>
-  <iframe id="ad-frame" src="about:blank"></iframe>
+  <div id="ad-container"></div>
   <script>
     (function() {
-      var adUrl = 'http://wm.lrswl.com/page/?s=295046';
-      var proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(adUrl);
+      var adId = '295046';
+      var adWidth = 950;
+      var adHeight = 90;
       
-      var iframe = document.getElementById('ad-frame');
-      iframe.src = proxyUrl;
+      var proxies = [
+        function(url) { return 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url); },
+        function(url) { return 'https://corsproxy.io/?' + encodeURIComponent(url); },
+        function(url) { return 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url); },
+        function(url) { return 'https://www.whateverorigin.org/get?url=' + encodeURIComponent(url) + '&callback=?'; },
+        function(url) { return 'https://thingproxy.freeboard.io/fetch/' + url; }
+      ];
       
-      iframe.onerror = function() {
-        var backupProxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(adUrl);
-        iframe.src = backupProxy;
-      };
+      var currentProxyIndex = 0;
+      var container = document.getElementById('ad-container');
+      
+      function tryNextProxy() {
+        if (currentProxyIndex >= proxies.length) {
+          fallbackToDirectScript();
+          return;
+        }
+        
+        var proxyFn = proxies[currentProxyIndex];
+        currentProxyIndex++;
+        
+        var adScriptUrl = 'http://wm.lrswl.com/page/s.php?s=' + adId + '&w=' + adWidth + '&h=' + adHeight;
+        var proxiedUrl = proxyFn(adScriptUrl);
+        
+        fetch(proxiedUrl)
+          .then(function(res) {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.text();
+          })
+          .then(function(scriptContent) {
+            var iframeMatch = scriptContent.match(/src="([^"]+)"/);
+            if (iframeMatch && iframeMatch[1]) {
+              var iframeSrc = iframeMatch[1];
+              loadAdIframe(iframeSrc, proxyFn);
+            } else {
+              tryNextProxy();
+            }
+          })
+          .catch(function() {
+            tryNextProxy();
+          });
+      }
+      
+      function loadAdIframe(iframeSrc, proxyFn) {
+        var proxiedIframeSrc = proxyFn(iframeSrc);
+        var iframe = document.createElement('iframe');
+        iframe.src = proxiedIframeSrc;
+        iframe.width = '100%';
+        iframe.height = adHeight;
+        iframe.frameBorder = '0';
+        iframe.marginWidth = '0';
+        iframe.marginHeight = '0';
+        iframe.vspace = '0';
+        iframe.hspace = '0';
+        iframe.allowTransparency = 'true';
+        iframe.scrolling = 'no';
+        iframe.style.width = '100%';
+        iframe.style.border = 'none';
+        iframe.style.display = 'block';
+        
+        iframe.onload = function() {
+        };
+        
+        iframe.onerror = function() {
+          if (currentProxyIndex < proxies.length) {
+            container.innerHTML = '';
+            tryNextProxy();
+          }
+        };
+        
+        container.innerHTML = '';
+        container.appendChild(iframe);
+      }
+      
+      function fallbackToDirectScript() {
+        var script = document.createElement('script');
+        script.src = 'http://wm.lrswl.com/page/s.php?s=' + adId + '&w=' + adWidth + '&h=' + adHeight;
+        container.appendChild(script);
+      }
+      
+      if (location.protocol === 'https:') {
+        tryNextProxy();
+      } else {
+        fallbackToDirectScript();
+      }
     })();
   </script>
 </body>
