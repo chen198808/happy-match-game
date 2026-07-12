@@ -3,6 +3,7 @@ import { TopBar } from '../components/TopBar';
 import { GameBoard } from '../components/GameBoard';
 import { ToolBar } from '../components/ToolBar';
 import { AdBanner } from '../components/AdBanner';
+import { AdBannerBottom } from '../components/AdBannerBottom';
 import { ResultModal } from '../components/ResultModal';
 import { useGameStore } from '../store/useGameStore';
 
@@ -32,6 +33,10 @@ function Home() {
 
         <div className="flex flex-col items-center gap-3">
           <ToolBar />
+        </div>
+
+        <div className="w-full">
+          <AdBannerBottom size="950x90" />
         </div>
       </div>
 
